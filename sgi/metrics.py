@@ -5,7 +5,6 @@ import numpy as np
 from sgi.distance import DistanceMetric
 from sgi.weights import RangeDistanceBand
 import pandas as pd
-import warnings
 import scipy.stats
 import timeit
 
