@@ -52,7 +52,7 @@ setup(
     platforms='any',
     include_package_data=True, 
     keywords='gis,spatial-gini,gini,dispersion',
-    name='spatial-dispersion-index',
+    name='spatial-gini-index',
     packages=find_packages(include=['sgi', 'sgi.*']),
     tests_require=test_requirements,
     url='https://github.com/gpirrotta/spatial-gini-index',
