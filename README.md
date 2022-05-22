@@ -1,4 +1,4 @@
-## Spatial Dispersion Index
+## Spatial Gini Index
 
 
 
@@ -21,7 +21,7 @@ Using the tool
 
 License
 -------
-* **Spatial Dispersion Index**: [MIT license](https://spdx.org/licenses/MIT.html)
+[MIT license](https://spdx.org/licenses/MIT.html)
 
 
 Credits
