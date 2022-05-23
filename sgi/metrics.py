@@ -39,6 +39,7 @@ class SGI:
         self._permutations = permutations
         self._time_sgi = 0.0
         self._time_pvalue = 0.0
+        self._z_cals = None
 
         self._build()
 
@@ -194,6 +195,7 @@ class SGI:
         self._sgis = sgis
         sqm = np.std(sgis)
         z_cal = (self._sgi-0.5)/(sqm/np.sqrt(self._permutations))        
+        self._z_cal = z_cal
         pvalue = scipy.stats.norm.sf(abs(z_cal))*2
 
         return pvalue
@@ -318,6 +320,8 @@ class SGI:
         ).astype(schema)
 
         data["pvalue"] = ""
+        data["zcal"] = ""
+        
         data["Time (seconds)"] = ""
         
 
@@ -325,6 +329,11 @@ class SGI:
             0, data.columns.get_loc("pvalue")
         ] = self._pvalue
         
+        data.iat[
+            0, data.columns.get_loc("zcal")
+        ] = self._z_cal
+        
+
         data.iat[
             0, data.columns.get_loc("Time (seconds)")
         ] = self._time_pvalue
