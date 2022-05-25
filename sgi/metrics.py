@@ -32,15 +32,16 @@ class SGI:
         self._report = None
         self._report_pvalue = None
         self._labels = labels
-        self._pvalue = None
+        self._pvalue_z = None
+        self._pvalue_mc = None
+
         self._n = points.shape[0]
         self._distance_matrix = None
         self._sgis = []
         self._permutations = permutations
         self._time_sgi = 0.0
         self._time_pvalue = 0.0
-        self._z_cals = None
-
+        
         self._build()
 
     
@@ -54,10 +55,9 @@ class SGI:
 
         self._time_sgi= timeit.default_timer() - start_time
 
-
         if self._permutations > 0:
             start_time = timeit.default_timer()
-            self._pvalue = self._build_pvalue()
+            self._pvalue_z, self._pvalue_mc = self._build_pvalue()
             self._time_pvalue= timeit.default_timer() - start_time
         
 
@@ -196,9 +196,17 @@ class SGI:
         sqm = np.std(sgis)
         z_cal = (self._sgi-0.5)/(sqm/np.sqrt(self._permutations))        
         self._z_cal = z_cal
-        pvalue = scipy.stats.norm.sf(abs(z_cal))*2
+        pvalue_z = scipy.stats.norm.sf(abs(z_cal))*2
 
-        return pvalue
+    
+        above = np.abs(sgis - 0.5) >= self._sgi
+        larger = above.sum()
+        if (self._permutations - larger) < larger:
+            larger = self._permutations - larger
+
+        pvalue_mc = (larger + 1.) / (self._permutations + 1.)
+
+        return pvalue_z, pvalue_mc
 
     
     def _spatial_lag_total(self, distance_matrix, min_threshold, max_threshold, target_matrix=None):
@@ -319,19 +327,26 @@ class SGI:
             columns=schema.keys(),
         ).astype(schema)
 
-        data["pvalue"] = ""
+        data["pvalue_z"] = ""
         data["zcal"] = ""
-        
+
+        data["pvalue_mc"] = ""
+
+
         data["Time (seconds)"] = ""
         
 
         data.iat[
-            0, data.columns.get_loc("pvalue")
-        ] = self._pvalue
+            0, data.columns.get_loc("pvalue_z")
+        ] = self._pvalue_z
         
         data.iat[
             0, data.columns.get_loc("zcal")
         ] = self._z_cal
+
+        data.iat[
+            0, data.columns.get_loc("pvalue_mc")
+        ] = self._pvalue_mc
         
 
         data.iat[
@@ -367,18 +382,26 @@ class SGI:
 
     @property
     def report_pvalue(self):
-        if self._pvalue is not None and self._report_pvalue is None:
+        if self._pvalue_z is not None and self._report_pvalue is None:
             self._build_report_pvalue()
             
         return self._report_pvalue
 
     
     @property
-    def pvalue(self):
-        if self._pvalue is None:
-            print("PValue not calculated")
+    def pvalue_z(self):
+        if self._pvalue_z is None:
+            print("PValue Z not calculated")
         else:
-            return self._pvalue
+            return self._pvalue_z
+
+
+    @property
+    def pvalue_mc(self):
+        if self._pvalue_mc is None:
+            print("PValue MC not calculated")
+        else:
+            return self._pvalue_mc
 
 
 
