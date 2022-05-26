@@ -7,9 +7,9 @@ from sgi.weights import RangeDistanceBand
 import pandas as pd
 import scipy.stats
 import timeit
+                
 
-
-
+np.random.seed(42)
 
 #example of decay function
 def decay_function(distance, h_distance, s, phi=5, alpha=2):
@@ -199,7 +199,7 @@ class SGI:
         pvalue_z = scipy.stats.norm.sf(abs(z_cal))*2
 
     
-        above = np.abs(sgis - 0.5) >= self._sgi
+        above = sgis >= self._sgi
         larger = above.sum()
         if (self._permutations - larger) < larger:
             larger = self._permutations - larger
