@@ -4,10 +4,11 @@ from scipy.sparse import csr_matrix
 import numpy as np
 from sgi.distance import DistanceMetric
 from sgi.weights import RangeDistanceBand
+from sgi.reports import Report                
+
 import pandas as pd
 import scipy.stats
 import timeit
-                
 
 np.random.seed(42)
 
@@ -22,6 +23,7 @@ class SGI:
     (Mucciardi et al.)
     '''
     def __init__(self, points, y, step='max-min', labels=None, permutations=0):
+        self._metric = 'SGI'
         self._points = points
         self._y = y
         self._step = step
@@ -29,6 +31,7 @@ class SGI:
         self._links = []
         self._variabilities = []
         self._h_distances = []
+        self._sgi = None
         self._report = None
         self._report_pvalue = None
         self._labels = labels
@@ -245,117 +248,9 @@ class SGI:
         return (y[:, np.newaxis] - y) ** 2
 
 
-    def _build_report_sgi(self):
-        
-        schema = {
-            "Spatial Lag": int,
-            "h-distance": float,
-            "Links": int,
-            "Contiguity Variability": float
-        }
-
-        number_lags = np.arange(1,len(self._h_distances)+1)
-
-        data = pd.DataFrame(
-            np.c_[
-                number_lags,
-                self.h_distances,
-                self.links,
-                self._variabilities
-            ],
-            columns=schema.keys(),
-        ).astype(schema)
-
-        self._set_links_name(data)
-
-        data["% Links"] = data["Links"] / data["Links"].sum(
-                axis=0
-            )
-        data["% Contiguity Variability"] = data[
-            "Contiguity Variability"
-        ] / data["Contiguity Variability"].sum(axis=0)
-        data["Cumulative Links"] = data["% Links"].cumsum()
-        data["Cumulative Contiguity Variability"] = data[
-            "% Contiguity Variability"
-        ].cumsum()
-        data["tg (rad)"] = np.arctan(
-            data["Cumulative Contiguity Variability"]
-            / data["Cumulative Links"]
-        )
-        data["tg (degree)"] = (data["tg (rad)"] * 360) / (2 * np.pi)
-
-        data["SDI"] = ""
-        data["Time in seconds"] = ""
-        
-        data.iat[
-            0, data.columns.get_loc("SDI")
-        ] = self._sgi
-        data.iat[
-            0, data.columns.get_loc("Time in seconds")
-        ] = self._time_sgi
-
-        data.fillna("", inplace=True)
-        self._report = data
-
-    def _set_links_name(self, data):
-        if self._step == "max-min" and self._labels is not None:
-
-            max_indexes = [np.where(self._distance_matrix == max_threshold)[0] for max_threshold in self._h_distances ]
-
-            max_indexes_sr = pd.Series(max_indexes)
-
-            tmp = pd.DataFrame()
-            tmp['Place A'] = max_indexes_sr.map(lambda x: self._labels[x[0]])
-            tmp['Place B'] = max_indexes_sr.map(lambda x: self._labels[x[1]])
-            
-            data['h-distance (links_name)'] = tmp['Place A'] +'-'+ tmp['Place B']
-
-
-
-    def _build_report_pvalue(self):
-        
-        schema = {
-            "Permutation": int,
-            "SGI": float
-        }
-
-
-        data = pd.DataFrame(
-            np.c_[
-                np.arange(1,self._permutations+1),
-                self._sgis            ],
-            columns=schema.keys(),
-        ).astype(schema)
-
-        data["pvalue_z"] = ""
-        data["zcal"] = ""
-
-        data["pvalue_mc"] = ""
-
-
-        data["Time (seconds)"] = ""
-        
-
-        data.iat[
-            0, data.columns.get_loc("pvalue_z")
-        ] = self._pvalue_z
-        
-        data.iat[
-            0, data.columns.get_loc("zcal")
-        ] = self._z_cal
-
-        data.iat[
-            0, data.columns.get_loc("pvalue_mc")
-        ] = self._pvalue_mc
-        
-
-        data.iat[
-            0, data.columns.get_loc("Time (seconds)")
-        ] = self._time_pvalue
-
-        data.fillna("", inplace=True)
-        self._report_pvalue = data
-
+    @property
+    def metric(self):
+        return self._metric
 
     @property
     def h_distances(self):
@@ -375,17 +270,14 @@ class SGI:
             
     @property
     def report(self):
-        if self._report is None:
-            self._build_report_sgi()
-            
-        return self._report
+        report = Report(self)
+    
+        return report.report
 
     @property
     def report_pvalue(self):
-        if self._pvalue_z is not None and self._report_pvalue is None:
-            self._build_report_pvalue()
-            
-        return self._report_pvalue
+        report = Report(self)
+        return report.report_pvalue
 
     
     @property
@@ -411,87 +303,15 @@ class SGD(SGI):
     Spatial Gini Decomposition
     (Rey et al.)
     '''
-    def __init__(self, points, y, step='max-min', labels=None):
-        SGI.__init__(self,points, y, step, labels)
+    def __init__(self, points, y, step='max-min', labels=None, permutations = 0):
+        SGI.__init__(self,points, y, step, labels, permutations)
+        self._metric = 'SGD'
+        
 
     def _target_matrix(self):
         return np.abs(self._y[:, np.newaxis] - self._y)
 
-    def _build_sgi(self):
+    def _build_sgi(self, variabilities):
         # In Rey Decomposition SGI is not calculated
         pass
-
-
-
-    def _build_report_sgi(self):
-
-
-        schema = {
-            "Spatial Lag": int,
-            "h-distance": float,
-            "Links": int,
-            "Contiguity Variability": float,
-        }
-
-        number_lags = np.arange(1,len(self._h_distances)+1)
-
-        data = pd.DataFrame(
-            np.c_[
-                number_lags,
-                self.h_distances,
-                self.links,
-                self._variabilities,
-            ],
-            columns=schema.keys(),
-        ).astype(schema)
-
-        self._set_links_name(data)
-
-        data["% Links"] = data["Links"] / data["Links"].sum(
-            axis=0
-        )
-        data["% Contiguity Variability"] = data[
-            "Contiguity Variability"
-        ] / data["Contiguity Variability"].sum(axis=0)
-
-        data["Cumulative Links"] = data["% Links"].cumsum()
-        data["Cumulative Contiguity Variability"] = data[
-            "% Contiguity Variability"
-        ].cumsum()        
-
-        #Non contiguity
-        data["Non Contiguity Links"] = (
-                data["Links"].sum(axis=0) - data["Links"]
-            )
-        data["Non Contiguity Variability"] = (
-                data["Contiguity Variability"].sum()
-                - data["Contiguity Variability"]
-            )
-
-        data["% Non Contiguity Links"] = data[
-                "Non Contiguity Links"
-            ] / data["Non Contiguity Links"].sum(axis=0)
-        
-        data["% Non Contiguity Variability"] = data[
-            "Non Contiguity Variability"
-        ] / data["Non Contiguity Variability"].sum(axis=0)
-        data["Cumulative Non Contiguity Links"] = data[
-            "% Non Contiguity Links"
-        ].cumsum()
-        data["Cumulative Non Contiguity Variability"] = data[
-            "% Non Contiguity Variability"
-        ].cumsum()
-
-        data["G (C)"] = data["Contiguity Variability"] / (
-            2 * np.mean(self._y) * self._y.shape[0] ** 2
-        )
-        data["G (NC)"] = data["Non Contiguity Variability"] / (
-            2 * np.mean(self._y) * self._y.shape[0] ** 2
-        )
-        data["G (ASP)"] = data["Contiguity Variability"].sum(axis=0) / (
-            2 * np.mean(self._y) * self._y.shape[0] ** 2
-        )
-
-        data.fillna("", inplace=True)
-        self._report = data
 
