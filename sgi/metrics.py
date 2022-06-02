@@ -267,6 +267,10 @@ class SGI:
     @property
     def sgi(self):
         return self._sgi
+
+    @property
+    def distance_matrix(self):
+        return self._distance_matrix
             
     @property
     def report(self):
