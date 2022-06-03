@@ -5,6 +5,7 @@ import numpy as np
 from sgi.distance import DistanceMetric
 from sgi.weights import RangeDistanceBand
 from sgi.reports import Report                
+from sgi.utils import trapezoidify_area
 
 import pandas as pd
 import scipy.stats
@@ -72,7 +73,6 @@ class SGI:
         elif self._step == 'constant':
             return self._build_weights_constant()
         
-        
 
     
     def _build_weights_maxmin(self):
@@ -90,7 +90,6 @@ class SGI:
         h_distances = []
         links = []
         variabilities = []
-
 
         with tqdm(total=total_links, disable=disable) as pbar:            
             while progressive_num_links < total_links:
@@ -204,8 +203,8 @@ class SGI:
     
         above = sgis >= self._sgi
         larger = above.sum()
-        if (self._permutations - larger) < larger:
-            larger = self._permutations - larger
+        #if (self._permutations - larger) < larger:
+        #    larger = self._permutations - larger
 
         pvalue_mc = (larger + 1.) / (self._permutations + 1.)
 
@@ -228,24 +227,19 @@ class SGI:
         
 
     def _build_sgi(self, variabilities):            
-        links = np.asarray(self._links)
-        links = links / links.sum()
-        cumulative_links = links.cumsum()
-        links_total_differences = np.diff(np.r_[[0], cumulative_links])
 
-        variabilities = np.asarray(variabilities)
-        variabilities = variabilities/ (variabilities.sum())
-        cumulative_variabilities = variabilities.cumsum()
-        J_total = np.r_[cumulative_variabilities[0],np.resize(cumulative_variabilities[1:],cumulative_variabilities.shape) + cumulative_variabilities][:-1]
-                
-        sgi = 1 - (np.sum(links_total_differences * J_total) / 2)
+        area,_,_ = trapezoidify_area(variabilities, self._links)
 
-        return sgi
+        return 1 - area
 
 
 
     def _build_target_matrix(self, y):
         return (y[:, np.newaxis] - y) ** 2
+
+    @property
+    def target(self):
+        return self._y
 
 
     @property
