@@ -6,3 +6,5 @@ usecase*
 .DS_Store
 notebooks/
 output/
+*usecase*
+myanalysis/*
