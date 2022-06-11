@@ -16,11 +16,26 @@ Installation
 Library Reference
 -----------------
 
-* **SGI**
+#### Class: sgi.metrics.SGI
 
-(self, points, y, step='max-min', labels=None, permutations=0):
+**Constructor Parameters**
+- **points**: `ndarray`, Nx2 array containing longitude/latitude data with `float` type
+- **y**: `ndarray`, containing target values
+- **step**: `str`, step distance method. Available `max-min` and `constant`. Default: `max-min`
+- **label**: `ndarray`, points labels
+- **permutation**: `int`, if different from 9 it use the permutation number to compute the p-value. Default: 0
 
+**Methods**
 
+* **sgi**: `float`, the Spatial Gini Index
+* **target**: `ndarray`, the target values
+* **pvalue_mc**: `float`, the pvalue
+* **links**: `list`, the number of connections
+* **variabilities**: `list`, the contiguity variability values
+* **h_distances**: `list`, the h-distances values
+* **distance_matrix**: 2D `ndarray` (NxN), the distance matrix
+* **report**: pandas `dataframe`, general statistics
+* **report_pvalue**: pandas `dataframe`, pvalue statistics
 
 
 Using the tool
@@ -72,6 +87,7 @@ print(sgi.report) # SEE TABLE BELOW
 
 
 
+See the paper (Not ready yet)
 
 
 License
