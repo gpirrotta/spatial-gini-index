@@ -1,5 +1,5 @@
 ## Spatial Gini Index
-A Python library to computes the **Spatial Gini Index**, a new indicator to measure spatial concentration.
+A Python library to compute the **Spatial Gini Index**, a new indicator to measure spatial concentration.
 
 
 Requirements
