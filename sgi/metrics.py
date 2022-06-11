@@ -19,10 +19,23 @@ def decay_function(distance, h_distance, s, phi=5, alpha=2):
     return (distance[s[0,0],s[:,1]]**-2).tolist()
 
 class SGI:
-    '''
-    Spatial Gini Index 
-    (Mucciardi et al.)
-    '''
+    """Spatial Gini Index Class
+
+    The core of the library
+
+    Parameters
+    ----------
+    points: ndarray
+        Nx2 array containing Longitude/Latitude data with `float` type
+    y: ndarray
+        Nx1 array containing target values
+    step: str
+        Step Distance Method - Available: 'max-min','constant'
+    labels: ndarray
+        Points labels
+    permutations: int
+        If different from 0 it use the permutation number to compute the p-value - Default: 0
+    """
     def __init__(self, points, y, step='max-min', labels=None, permutations=0):
         self._metric = 'SGI'
         self._points = points
@@ -239,61 +252,134 @@ class SGI:
 
     @property
     def target(self):
+        """Get the target values
+
+        Returns
+        -------
+        int or float
+            The target values
+
+        """
         return self._y
 
 
     @property
     def metric(self):
+        """Get the metric type
+
+        Returns
+        -------
+        str
+            The metric type
+        """
+
         return self._metric
 
     @property
     def h_distances(self):
+        """Get h-distances values
+
+        Returns
+        -------
+        list of float
+            The h-distances
+        """
         return self._h_distances
 
     @property
     def links(self):
+        """Get the number of connections
+
+        Returns
+        -------
+        list of int
+            The number of connections
+        """
         return self._links
 
     @property
     def variabilities(self):
+        """Get contiguity variability values
+
+        Returns
+        -------
+        list
+            The contiguity variability values
+        """
         return self._variabilities
 
     @property
     def sgi(self):
+        """Get the Spatial Gini Index measure
+
+        Returns
+        -------
+        float
+            The Spatial Gini Index measure
+        """        
         return self._sgi
 
     @property
     def distance_matrix(self):
+        """Get the distance matrix
+
+        Returns
+        -------
+        ndarray
+            NxN Distance Matrix
+        """
         return self._distance_matrix
             
     @property
     def report(self):
+        """Get the statistics report
+
+        Returns
+        -------
+        DataFrame
+            The pandas dataframe of statistics
+        """
         report = Report(self)
     
         return report.report
 
     @property
     def report_pvalue(self):
+        """Get the p-value report
+
+        Returns
+        -------
+        DataFrame
+        """        
         report = Report(self)
         return report.report_pvalue
 
     
-    @property
-    def pvalue_z(self):
-        if self._pvalue_z is None:
-            print("PValue Z not calculated")
-        else:
-            return self._pvalue_z
-
-
+    
     @property
     def pvalue_mc(self):
+        """Get the p-value
+
+        Returns
+        -------
+        float
+        """
+
         if self._pvalue_mc is None:
             print("PValue MC not calculated")
         else:
             return self._pvalue_mc
 
-
+    
+    @property
+    def pvalue_z(self):
+        """
+        Experimental: not stable
+        """
+        if self._pvalue_z is None:
+            print("PValue Z not calculated")
+        else:
+            return self._pvalue_z
 
 
 class SGD(SGI):
