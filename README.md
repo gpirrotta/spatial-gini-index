@@ -23,7 +23,7 @@ Library Reference
 - **y**: `ndarray`, containing target values
 - **step**: `str`, step distance method. Available `max-min` and `constant`. Default: `max-min`
 - **label**: `ndarray`, points labels
-- **permutation**: `int`, if different from 9 it use the permutation number to compute the p-value. Default: 0
+- **permutation**: `int`, if different from 0 it use the permutation number to compute the p-value. Default: 0
 
 **Methods**
 
@@ -97,4 +97,6 @@ License
 
 Credits
 -------
-[Giovanni Pirrotta](mailto:giovanni.pirrotta@gmail.com)
+[Federico Benassi](mailto:benassi@istat.it)
+[Massimo Mucciardi](mailto:massimo.mucciardi@unime.it)
+[Giovanni Pirrotta](mailto:giovanni.pirrotta@unime.it)
