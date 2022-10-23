@@ -98,5 +98,7 @@ License
 Credits
 -------
 [Federico Benassi](mailto:benassi@istat.it)
+
 [Massimo Mucciardi](mailto:massimo.mucciardi@unime.it)
+
 [Giovanni Pirrotta](mailto:giovanni.pirrotta@unime.it)
