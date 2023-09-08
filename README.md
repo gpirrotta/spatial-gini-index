@@ -87,7 +87,11 @@ print(sgi.report) # SEE TABLE BELOW
 
 
 
-See the paper (Not ready yet)
+Citation
+--------
+Benassi, Federico, Mucciardi, Massimo and Pirrotta, Giovanni. "Looking for a New Approach to Measuring the Spatial Concentration of the Human Population" Journal of Official Statistics, vol.39, no.3, 2023, pp.285-324. https://doi.org/10.2478/jos-2023-0014
+
+Download the [paper](https://sciendo.com/article/10.2478/jos-2023-0014)
 
 
 License
